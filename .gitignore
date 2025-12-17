@@ -122,3 +122,5 @@ dist
 .pnp.*
 
 /.old
+docs/LLM.prompt.md
+divortio-cryptoXOR.iml
