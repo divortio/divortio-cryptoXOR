@@ -1,5 +1,6 @@
 ```shell
-/Users/moe/.nvm/versions/node/v24.10.0/bin/node /Users/moe/projects/divortio-cryptoXOR/bench/benchmark.integrity.mjs
+node ./divortio-cryptoXOR/bench/benchmark.integrity.mjs
+
 
 ================================================================================
 CRYPTO INTEGRITY BENCHMARK
