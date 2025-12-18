@@ -3,14 +3,14 @@
  * **Role:** Transforms Node.js/Web Streams using the Xoshiro128 engine.
  * **Performance:** Implements "Zero-Copy Fast Path" to bypass buffer allocation
  * for aligned chunks (99% of network traffic).
- * **Features:** Native support for Pipeline Integrity (Chunked Hashing).
+ * **Features:** Native support for Pipeline ECC (Chunked Hashing).
  * @module CryptoXOR_Stream_Xoshiro128
  * @author CryptoXOR Team
  * @license MIT
  */
 
 import Xoshiro128 from './cryptoXOR.xoshiro128.js';
-import { ChunkedIntegrity } from './cryptoXOR.integrity.chunked.js';
+import { ChunkedECC } from './cryptoXOR.ecc.chunked.js';
 
 /**
  * @typedef {Object} StreamOptions
@@ -32,7 +32,7 @@ class XoshiroStream {
 
     /**
      * Creates an ENCRYPTION stream pipeline.
-     * **Pipeline:** `[Write] -> (IntegrityInjector?) -> [Cipher] -> [Read]`
+     * **Pipeline:** `[Write] -> (ECCInjector?) -> [Cipher] -> [Read]`
      * @param {string|Uint8Array} key - Secret Key.
      * @param {StreamOptions} [options] - Configuration.
      * @returns {TransformStream|PipelineResult} The writable/readable pair.
@@ -117,9 +117,9 @@ class XoshiroStream {
             }
         });
 
-        // 3. Optional Pipeline: Chunked Integrity
+        // 3. Optional Pipeline: Chunked ECC
         if (options.integrityBlockSize && options.integrityBlockSize > 0) {
-            const injector = ChunkedIntegrity.createInjector(options.integrityBlockSize);
+            const injector = ChunkedECC.createInjector(options.integrityBlockSize);
 
             // Connect: Injector -> Cipher
             // User writes to Injector (which hashes), then Injector pipes to Cipher (which encrypts)
@@ -136,7 +136,7 @@ class XoshiroStream {
 
     /**
      * Creates a DECRYPTION stream pipeline.
-     * **Pipeline:** `[Write] -> [Cipher] -> (IntegrityVerifier?) -> [Read]`
+     * **Pipeline:** `[Write] -> [Cipher] -> (ECCVerifier?) -> [Read]`
      * @param {string|Uint8Array} key - Secret Key.
      * @param {StreamOptions} [options] - Configuration.
      * @returns {TransformStream|PipelineResult} The writable/readable pair.
@@ -217,9 +217,9 @@ class XoshiroStream {
             }
         });
 
-        // 2. Optional Pipeline: Chunked Integrity
+        // 2. Optional Pipeline: Chunked ECC
         if (options.integrityBlockSize && options.integrityBlockSize > 0) {
-            const verifier = ChunkedIntegrity.createVerifier(options.integrityBlockSize);
+            const verifier = ChunkedECC.createVerifier(options.integrityBlockSize);
 
             // Connect: Cipher -> Verifier
             // Cipher decrypts -> Pipes to Verifier (checks hash & strips it) -> Output

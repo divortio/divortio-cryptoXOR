@@ -3,13 +3,13 @@
  * **Role:** Transforms Node.js/Web Streams using the SplitMix32 engine.
  * **Performance:** Implements "Zero-Copy Fast Path" to bypass buffer allocation
  * for aligned chunks.
- * **Features:** Native support for Pipeline Integrity (Chunked Hashing).
+ * **Features:** Native support for Pipeline ECC (Chunked Hashing).
  * **Warning:** Use for low-stakes data obfuscation only (32-bit state).
  * @module CryptoXOR_Stream_SplitMix32
  */
 
 import SplitMix32 from './cryptoXOR.splitmix32.js';
-import { ChunkedIntegrity } from './cryptoXOR.integrity.chunked.js';
+import { ChunkedECC } from './cryptoXOR.ecc.chunked.js';
 
 /**
  * @typedef {Object} StreamOptions
@@ -31,7 +31,7 @@ class SplitMixStream {
 
     /**
      * Creates an ENCRYPTION stream pipeline.
-     * **Pipeline:** `[Write] -> (IntegrityInjector?) -> [Cipher] -> [Read]`
+     * **Pipeline:** `[Write] -> (ECCInjector?) -> [Cipher] -> [Read]`
      * @param {string|Uint8Array} key - Secret Key.
      * @param {StreamOptions} [options] - Configuration.
      * @returns {TransformStream|PipelineResult} The writable/readable pair.
@@ -116,9 +116,9 @@ class SplitMixStream {
             }
         });
 
-        // 3. Optional Pipeline: Chunked Integrity
+        // 3. Optional Pipeline: Chunked ECC
         if (options.integrityBlockSize && options.integrityBlockSize > 0) {
-            const injector = ChunkedIntegrity.createInjector(options.integrityBlockSize);
+            const injector = ChunkedECC.createInjector(options.integrityBlockSize);
 
             // Connect: Injector -> Cipher
             // User writes to Injector (which hashes), then Injector pipes to Cipher (which encrypts)
@@ -135,7 +135,7 @@ class SplitMixStream {
 
     /**
      * Creates a DECRYPTION stream pipeline.
-     * **Pipeline:** `[Write] -> [Cipher] -> (IntegrityVerifier?) -> [Read]`
+     * **Pipeline:** `[Write] -> [Cipher] -> (ECCVerifier?) -> [Read]`
      * @param {string|Uint8Array} key - Secret Key.
      * @param {StreamOptions} [options] - Configuration.
      * @returns {TransformStream|PipelineResult} The writable/readable pair.
@@ -216,9 +216,9 @@ class SplitMixStream {
             }
         });
 
-        // 2. Optional Pipeline: Chunked Integrity
+        // 2. Optional Pipeline: Chunked ECC
         if (options.integrityBlockSize && options.integrityBlockSize > 0) {
-            const verifier = ChunkedIntegrity.createVerifier(options.integrityBlockSize);
+            const verifier = ChunkedECC.createVerifier(options.integrityBlockSize);
 
             // Connect: Cipher -> Verifier
             // Cipher decrypts -> Pipes to Verifier (checks hash & strips it) -> Output

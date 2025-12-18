@@ -1,9 +1,9 @@
 /**
- * @fileoverview Atomic Integrity Module.
+ * @fileoverview Atomic ECC Module.
  * **Role:** Provides "Hash-then-Encrypt" tamper detection for in-memory buffers.
  * **Algorithm:** Jenkins Lookup3 (32-bit). Selected for extremely high throughput (600MB/s+) on blocks.
  * **Overhead:** Adds exactly 4 bytes to the ciphertext payload.
- * @module CryptoXOR_Integrity
+ * @module CryptoXOR_ecc
  * @author CryptoXOR Team
  * @license MIT
  */
@@ -77,7 +77,7 @@ function lookup3(k, init) {
     return c >>> 0;
 }
 
-export const Integrity = {
+export const ECC = {
 
     /**
      * Encrypts data and embeds a checksum *inside* the encryption envelope.
@@ -103,14 +103,14 @@ export const Integrity = {
     },
 
     /**
-     * Decrypts, extracts checksum, and verifies integrity.
+     * Decrypts, extracts checksum, and verifies ECC.
      * @param {CipherInterface} cipherInstance
      * @param {Uint8Array} ciphertext
      * @returns {Uint8Array}
      */
     decryptWithChecksum(cipherInstance, ciphertext) {
         if (ciphertext.length < 4) {
-            throw new Error("CryptoXOR Integrity: Data too short.");
+            throw new Error("CryptoXOR ECC: Data too short.");
         }
 
         const decryptedWrapper = cipherInstance.process(ciphertext);
@@ -126,7 +126,7 @@ export const Integrity = {
         const actualHash = lookup3(data, 0);
 
         if (actualHash !== expectedHash) {
-            throw new Error("🚨 CryptoXOR Integrity Failure: Data tampered or key incorrect.");
+            throw new Error("🚨 CryptoXOR ECC Failure: Data tampered or key incorrect.");
         }
 
         return data;

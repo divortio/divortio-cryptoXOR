@@ -1,10 +1,10 @@
 /**
- * @fileoverview Chunked Integrity Module for Streams.
- * **Role:** Provides "Rolling Integrity" for infinite streams.
+ * @fileoverview Chunked ECC Module for Streams.
+ * **Role:** Provides "Rolling ECC" for infinite streams.
  * **Mechanism:** Splits streams into fixed-size blocks (e.g., 64KB).
  * **Algorithm:** Jenkins Lookup3 (32-bit). Fast block processing.
  * **Security:** Uses "Chain Hash" (Previous Block Hash becomes Seed for Next Block).
- * @module CryptoXOR_Integrity_Chunked
+ * @module CryptoXOR_ECC_Chunked
  * @author CryptoXOR Team
  * @license MIT
  */
@@ -62,7 +62,7 @@ function lookup3(k, init) {
     return c >>> 0;
 }
 
-export const ChunkedIntegrity = {
+export const ChunkedECC = {
 
     /**
      * Creates an INJECTOR stream (Sender Side).
@@ -146,7 +146,7 @@ export const ChunkedIntegrity = {
                     const actualHash = lookup3(data, prevHash);
 
                     if (expectedHash !== actualHash) {
-                        throw new Error("🚨 CryptoXOR Stream Integrity Failure: Block corrupted.");
+                        throw new Error("🚨 CryptoXOR Stream ECC Failure: Block corrupted.");
                     }
 
                     prevHash = actualHash;
@@ -156,7 +156,7 @@ export const ChunkedIntegrity = {
 
             flush(controller) {
                 if (buffer.length > 0) {
-                    if (buffer.length < 4) throw new Error("CryptoXOR Stream Integrity: Stream truncated.");
+                    if (buffer.length < 4) throw new Error("CryptoXOR Stream ECC: Stream truncated.");
 
                     const dataLen = (buffer.length - 4) | 0;
                     const data = buffer.subarray(0, dataLen);
@@ -166,7 +166,7 @@ export const ChunkedIntegrity = {
                     const actualHash = lookup3(data, prevHash);
 
                     if (expectedHash !== actualHash) {
-                        throw new Error("🚨 CryptoXOR Stream Integrity Failure: Final block corrupted.");
+                        throw new Error("🚨 CryptoXOR Stream ECC Failure: Final block corrupted.");
                     }
 
                     controller.enqueue(data);

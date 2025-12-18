@@ -3,17 +3,17 @@
  * **Role:** Transforms Node.js/Web Streams using the SFC32 engine.
  * **Performance:** Implements "Zero-Copy Fast Path" to bypass buffer allocation
  * for aligned chunks (99% of network traffic).
- * **Features:** Native support for Pipeline Integrity (Chunked Hashing).
+ * **Features:** Native support for Pipeline ECC (Chunked Hashing).
  * @module CryptoXOR_Stream_SFC32
  */
 
 import SFC32 from './cryptoXOR.sfc32.js';
-import { ChunkedIntegrity } from './cryptoXOR.integrity.chunked.js';
+import { ChunkedECC } from './cryptoXOR.ecc.chunked.js';
 
 /**
  * @typedef {Object} StreamOptions
  * @property {Uint8Array|function(): Uint8Array} [iv] - Manual IV strategy.
- * @property {number} [integrityBlockSize] - If > 0, enables chunked integrity checks (e.g., 65536).
+ * @property {number} [eccBlockSize] - If > 0, enables chunked ecc checks (e.g., 65536).
  */
 
 /**
@@ -27,7 +27,7 @@ class SFC32Stream {
 
     /**
      * Creates an ENCRYPTION stream pipeline.
-     * **Pipeline:** `[Write] -> (IntegrityInjector?) -> [Cipher] -> [Read]`
+     * **Pipeline:** `[Write] -> (ECCInjector?) -> [Cipher] -> [Read]`
      * @param {string|Uint8Array} key - Secret Key.
      * @param {StreamOptions} [options] - Configuration.
      * @returns {TransformStream|PipelineResult} The writable/readable pair.
@@ -112,9 +112,9 @@ class SFC32Stream {
             }
         });
 
-        // 3. Optional Pipeline: Chunked Integrity
-        if (options.integrityBlockSize && options.integrityBlockSize > 0) {
-            const injector = ChunkedIntegrity.createInjector(options.integrityBlockSize);
+        // 3. Optional Pipeline: Chunked ECC
+        if (options.eccBlockSize && options.eccBlockSize > 0) {
+            const injector = ChunkedECC.createInjector(options.eccBlockSize);
 
             // Connect: Injector -> Cipher
             // User writes to Injector (which hashes), then Injector pipes to Cipher (which encrypts)
@@ -131,7 +131,7 @@ class SFC32Stream {
 
     /**
      * Creates a DECRYPTION stream pipeline.
-     * * **Pipeline:** `[Write] -> [Cipher] -> (IntegrityVerifier?) -> [Read]`
+     * * **Pipeline:** `[Write] -> [Cipher] -> (ECCVerifier?) -> [Read]`
      * @param {string|Uint8Array} key - Secret Key.
      * @param {StreamOptions} [options] - Configuration.
      * @returns {TransformStream|PipelineResult} The writable/readable pair.
@@ -212,9 +212,9 @@ class SFC32Stream {
             }
         });
 
-        // 2. Optional Pipeline: Chunked Integrity
+        // 2. Optional Pipeline: Chunked ECC
         if (options.integrityBlockSize && options.integrityBlockSize > 0) {
-            const verifier = ChunkedIntegrity.createVerifier(options.integrityBlockSize);
+            const verifier = ChunkedECC.createVerifier(options.integrityBlockSize);
 
             // Connect: Cipher -> Verifier
             // Cipher decrypts -> Pipes to Verifier (checks hash & strips it) -> Output

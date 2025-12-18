@@ -1,26 +1,26 @@
 /**
  * @fileoverview Base class for the CryptoXOR cipher suite.
  * Provides unified logic for Key normalization, IV resolution, and
- * optional Integrity verification wrappers.
+ * optional ECC verification wrappers.
  * @module CryptoXOR_Base
  */
 
 import CryptoSeeds from './cryptoXOR.seeds.js';
-import { Integrity } from './cryptoXOR.integrity.js';
+import { ECC } from './cryptoXOR.ecc.js';
 
 /**
  * @typedef {Object} CipherOptions
- * @property {boolean} [integrity=false] - If true, appends/verifies a 32-bit FNV-1a checksum.
+ * @property {boolean} [ecc=false] - If true, appends/verifies a 32-bit FNV-1a checksum.
  */
 
 /**
  * @typedef {Object} EncryptOptions
- * @property {boolean} [integrity=false] - If true, appends a 4-byte checksum to the payload.
+ * @property {boolean} [ecc=false] - If true, appends a 4-byte checksum to the payload.
  */
 
 /**
  * @typedef {Object} DecryptOptions
- * @property {boolean} [integrity=false] - If true, extracts and verifies the 4-byte checksum.
+ * @property {boolean} [ecc=false] - If true, extracts and verifies the 4-byte checksum.
  * @throws {Error} If checksum verification fails.
  */
 
@@ -122,11 +122,11 @@ class CryptoXORBase {
 
         let ciphertext;
 
-        // 2. Handle Integrity Logic
-        if (options.integrity) {
-            // Delegate to Integrity module (Appends hash, then encrypts)
+        // 2. Handle ECC Logic
+        if (options.ecc) {
+            // Delegate to ECC module (Appends hash, then encrypts)
             // We pass 'sessionCipher' which holds the logic (SFC32) and state
-            ciphertext = Integrity.encryptWithChecksum(sessionCipher, bytes);
+            ciphertext = ECC.encryptWithChecksum(sessionCipher, bytes);
         } else {
             // Standard Processing
             ciphertext = sessionCipher.process(bytes);
@@ -142,11 +142,11 @@ class CryptoXORBase {
 
     /**
      * One-shot decryption helper.
-     * Extracts IV, initializes cipher, and decrypts (verifying integrity if requested).
+     * Extracts IV, initializes cipher, and decrypts (verifying ecc if requested).
      * @param {Uint8Array} input - The raw encrypted payload (must start with 16-byte IV).
      * @param {DecryptOptions} [options] - Configuration options.
      * @returns {string} The UTF-8 decoded plaintext.
-     * @throws {Error} If input is too short or Integrity check fails.
+     * @throws {Error} If input is too short or ECC check fails.
      */
     decrypt(input, options = {}) {
         if (input.length < 16) {
@@ -164,9 +164,9 @@ class CryptoXORBase {
         let decryptedBytes;
 
         // 3. Process & Verify
-        if (options.integrity) {
+        if (options.ecc) {
             // Decrypts, extracts hash, compares, and returns ONLY data
-            decryptedBytes = Integrity.decryptWithChecksum(sessionCipher, ciphertext);
+            decryptedBytes = ECC.decryptWithChecksum(sessionCipher, ciphertext);
         } else {
             // Standard Decryption
             decryptedBytes = sessionCipher.process(ciphertext);
