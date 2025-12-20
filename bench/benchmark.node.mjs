@@ -18,24 +18,24 @@ import { ChaCha20Node } from './libs/node/chaCha20.node.js';
 import FastChaCha20 from './libs/v8/chaCha20.v8.js';
 
 import { StitchedCipherNode } from './libs/node/stitched.node.js';
-import { Aes128CcmNode } from './libs/node/aes128ccm.node.js';
+import { Aes128CcmNode } from './libs/node/aes128.ccm.node.js';
 import { CamelliaNode } from './libs/node/camellia.node.js';
 import { BlowfishNode } from './libs/node/blowfish.node.js';
-import { DesCbcNode } from './libs/node/des_cbc.node.js';
+import { DesCbcNode } from './libs/node/des.cbc.node.js';
 
 import { DesNode } from './libs/node/des.node.js';
 import { Des3Node } from './libs/node/des3.node.js';
-import { Rc4HmacMd5Node } from './libs/node/rc4hmacmd5.node.js';
+import { Rc4HmacMd5Node } from './libs/node/rc4.hmac.md5.node.js';
 import { Aes256Node } from './libs/node/aes256.node.js';
 import { Aes128Node } from './libs/node/aes128.node.js';
 import { Rc4Node } from './libs/node/rc4.node.js';
 
-import { ChaCha20Poly1305Node } from './libs/node/chacha20poly1305.node.js';
+import { ChaCha20Poly1305Node } from './libs/node/chaCha20.poly1305.node.js';
 
-import { Aes128CtrNode } from './libs/node/aes128ctr.node.js';
-import { Aes128GcmNode } from './libs/node/aes128gcm.node.js';
-import { Aes256CtrNode } from './libs/node/aes256ctr.node.js';
-import { Aes256GcmNode } from './libs/node/aes256gcm.node.js';
+import { Aes128CtrNode } from './libs/node/aes128.ctr.node.js';
+import { Aes128GcmNode } from './libs/node/aes128.gcm.node.js';
+import { Aes256CtrNode } from './libs/node/aes256.ctr.node.js';
+import { Aes256GcmNode } from './libs/node/aes256.gcm.node.js';
 
 
 
