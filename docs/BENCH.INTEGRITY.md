@@ -1,5 +1,5 @@
 ```shell
-node ./divortio-cryptoXOR/bench/benchmark.integrity.mjs
+node ./divortio-cryptoXOR/bench/benchmark.integrity.node.mjs
 
 
 ================================================================================

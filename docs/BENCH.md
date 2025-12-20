@@ -1,6 +1,6 @@
 ```shell
 
-node ./divortio-cryptoXOR/bench/benchmark.mjs
+node ./divortio-cryptoXOR/bench/benchmark.node.mjs
 
 ================================================================================
 BENCHMARK REPORT
