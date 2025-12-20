@@ -14,8 +14,31 @@ import {
 
 // External Libs (ChaCha20)
 // Ensure these files exist in /bench/libs/
-import { NativeChaCha20 } from './libs/chaCha20.node.js';
-import FastChaCha20 from './libs/chaCha20.v8.js';
+import { ChaCha20Node } from './libs/node/chaCha20.node.js';
+import FastChaCha20 from './libs/v8/chaCha20.v8.js';
+
+import { StitchedCipherNode } from './libs/node/stitched.node.js';
+import { Aes128CcmNode } from './libs/node/aes128ccm.node.js';
+import { CamelliaNode } from './libs/node/camellia.node.js';
+import { BlowfishNode } from './libs/node/blowfish.node.js';
+import { DesCbcNode } from './libs/node/des_cbc.node.js';
+
+import { DesNode } from './libs/node/des.node.js';
+import { Des3Node } from './libs/node/des3.node.js';
+import { Rc4HmacMd5Node } from './libs/node/rc4hmacmd5.node.js';
+import { Aes256Node } from './libs/node/aes256.node.js';
+import { Aes128Node } from './libs/node/aes128.node.js';
+import { Rc4Node } from './libs/node/rc4.node.js';
+
+import { ChaCha20Poly1305Node } from './libs/node/chacha20poly1305.node.js';
+
+import { Aes128CtrNode } from './libs/node/aes128ctr.node.js';
+import { Aes128GcmNode } from './libs/node/aes128gcm.node.js';
+import { Aes256CtrNode } from './libs/node/aes256ctr.node.js';
+import { Aes256GcmNode } from './libs/node/aes256gcm.node.js';
+
+
+
 
 // -----------------------------------------------------------------------------
 // CONFIGURATION
@@ -62,9 +85,40 @@ function getSystemInfo() {
     };
 }
 
+function wrapDesNode() {
+    // DES Key = 8 bytes
+    const key = Buffer.alloc(8, 1);
+    const nonce = Buffer.alloc(12, 1); // Wrapper truncates to 8
+    const cipher = new DesNode(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
+
+function wrapDes3Node() {
+    // 3DES Key = 24 bytes
+    const key = Buffer.alloc(24, 1);
+    const nonce = Buffer.alloc(12, 1); // Wrapper truncates to 8
+    const cipher = new Des3Node(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
+
 // -----------------------------------------------------------------------------
 // TEST WRAPPERS
 // -----------------------------------------------------------------------------
+
+
+function wrapDesCbcNode() {
+    // DES Key = 8 bytes
+    const key = Buffer.alloc(8, 1);
+    const nonce = Buffer.alloc(12, 1); // Truncated to 8 by adapter
+    const cipher = new DesCbcNode(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
 
 // Wrapper for "Core" functions (repeatedly calls generator)
 function wrapCore(prngFunc) {
@@ -83,16 +137,145 @@ function wrapCore(prngFunc) {
 function wrapChaChaNative() {
     const key = Buffer.alloc(32, 1);
     const nonce = Buffer.alloc(12, 1);
-    const cipher = new NativeChaCha20(key, nonce);
+    const cipher = new ChaCha20Node(key, nonce);
     return (buffer) => {
         cipher.process(buffer);
     };
 }
 
+function wrapAesCtrNode() {
+    const key = Buffer.alloc(32, 1);
+    const nonce = Buffer.alloc(12, 1); // Adapter will pad to 16
+    const cipher = new Aes256CtrNode(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
+
+function wrapAesGcmNode() {
+    const key = Buffer.alloc(32, 1);
+    const nonce = Buffer.alloc(12, 1);
+    const cipher = new Aes256GcmNode(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
+
+function wrapAes128Node() {
+    // 128-bit Key = 16 Bytes
+    const key = Buffer.alloc(16, 1);
+    // 12-byte nonce (will be padded by adapter)
+    const nonce = Buffer.alloc(12, 1);
+    const cipher = new Aes128Node(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
 function wrapChaChaV8() {
     const key = new Uint8Array(32); key.fill(1);
     const nonce = new Uint8Array(12); nonce.fill(1);
     const cipher = new FastChaCha20(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
+
+// --- Stitched AES Wrappers ---
+function wrapStitchedAes128() {
+    // Note: Stitched ciphers often work with standard 16-byte keys in Node
+    // but typically imply a concatenated MAC key. We test with 32 bytes
+    // to cover both (16 AES + 16 HMAC) just in case, or let OpenSSL truncate.
+    const key = Buffer.alloc(32, 1);
+    const nonce = Buffer.alloc(16, 1);
+    const cipher = new StitchedCipherNode('aes-128-cbc-hmac-sha1', key, nonce);
+    return (buffer) => cipher.process(buffer);
+}
+
+function wrapStitchedAes256() {
+    const key = Buffer.alloc(48, 1); // 32 AES + 16 HMAC?
+    const nonce = Buffer.alloc(16, 1);
+    const cipher = new StitchedCipherNode('aes-256-cbc-hmac-sha1', key, nonce);
+    return (buffer) => cipher.process(buffer);
+}
+
+// --- AEAD Wrappers ---
+function wrapAes128CcmNode() {
+    const key = Buffer.alloc(16, 1);
+    const nonce = Buffer.alloc(12, 1);
+    const cipher = new Aes128CcmNode(key, nonce);
+    return (buffer) => cipher.process(buffer);
+}
+
+// --- Exotic Wrappers ---
+function wrapCamellia128Node() {
+    const key = Buffer.alloc(16, 1);
+    const nonce = Buffer.alloc(16, 1);
+    const cipher = new CamelliaNode('128', key, nonce);
+    return (buffer) => cipher.process(buffer);
+}
+
+function wrapBlowfishNode() {
+    const key = Buffer.alloc(16, 1); // 128-bit key
+    const nonce = Buffer.alloc(8, 1);
+    const cipher = new BlowfishNode(key, nonce);
+    return (buffer) => cipher.process(buffer);
+}
+function wrapRc4HmacMd5Node() {
+    // 16 bytes (128-bit) key
+    const key = Buffer.alloc(16, 1);
+    const nonce = Buffer.alloc(0);
+    const cipher = new Rc4HmacMd5Node(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
+
+function wrapAes256Node() {
+    // 256-bit Key = 32 Bytes
+    const key = Buffer.alloc(32, 1);
+    const nonce = Buffer.alloc(12, 1);
+    const cipher = new Aes256Node(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
+
+function wrapRc4Node() {
+    // RC4 supports variable key lengths.
+    // We use 16 bytes (128-bit) to match the "lightweight" comparison.
+    const key = Buffer.alloc(16, 1);
+    // Nonce is unused by RC4 class but passed for consistency
+    const nonce = Buffer.alloc(0);
+    const cipher = new Rc4Node(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
+
+function wrapChaCha20Poly1305Node() {
+    const key = Buffer.alloc(32, 1);
+    const nonce = Buffer.alloc(12, 1);
+    const cipher = new ChaCha20Poly1305Node(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
+
+function wrapAes128CtrNode() {
+    // 128-bit Key = 16 Bytes
+    const key = Buffer.alloc(16, 1);
+    const nonce = Buffer.alloc(12, 1);
+    const cipher = new Aes128CtrNode(key, nonce);
+    return (buffer) => {
+        cipher.process(buffer);
+    };
+}
+
+function wrapAes128GcmNode() {
+    // 128-bit Key = 16 Bytes
+    const key = Buffer.alloc(16, 1);
+    const nonce = Buffer.alloc(12, 1);
+    const cipher = new Aes128GcmNode(key, nonce);
     return (buffer) => {
         cipher.process(buffer);
     };
@@ -130,6 +313,34 @@ async function runBenchmark() {
         // ChaCha20 variants
         { name: 'chacha20 (native)',  fn: wrapChaChaNative() },
         { name: 'chacha20 (v8)',      fn: wrapChaChaV8() },
+
+        // Stitched (TLS Optimized)
+        { name: 'aes-128-stitched (sha1)', fn: wrapStitchedAes128() },
+        { name: 'aes-256-stitched (sha1)', fn: wrapStitchedAes256() },
+
+        // AEAD
+        { name: 'aes-128-ccm (node)',      fn: wrapAes128CcmNode() },
+       // DES
+        { name: 'des-cbc (node)',     fn: wrapDesCbcNode() },
+        { name: 'des (node)',         fn: wrapDesNode() },
+        { name: 'des3 (node)',        fn: wrapDes3Node() },
+        { name: 'rc4-hmac-md5 (node)', fn: wrapRc4HmacMd5Node() },
+        // Exotics
+        { name: 'camellia-128 (node)',     fn: wrapCamellia128Node() },
+        { name: 'blowfish (node)',         fn: wrapBlowfishNode() },
+        { name: 'aes128 (node)',      fn: wrapAes128Node() },
+        { name: 'aes256 (node)',      fn: wrapAes256Node() },
+        { name: 'rc4 (node)', fn: wrapRc4Node() },
+        { name: 'aes-256-ctr (node)', fn: wrapAesCtrNode() }, // Existing
+        { name: 'aes-128-ctr (node)', fn: wrapAes128CtrNode() }, // NEW
+
+        { name: 'aes-256-gcm (node)', fn: wrapAesGcmNode() }, // Existing
+        { name: 'aes-128-gcm (node)', fn: wrapAes128GcmNode() }, // NEW
+
+        // --- NEW BASELINES ---
+        { name: 'aes-256-ctr (node)', fn: wrapAesCtrNode() },
+        { name: 'aes-256-gcm (node)', fn: wrapAesGcmNode() },
+        { name: 'chacha20-poly1305 (node)', fn: wrapChaCha20Poly1305Node() },
     ];
 
     // Store all results for final tabulation
