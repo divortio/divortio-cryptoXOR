@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-export class NativeChaCha20 {
+export class ChaCha20Node {
     constructor(key, nonce) {
         this.algorithm = 'chacha20';
 
