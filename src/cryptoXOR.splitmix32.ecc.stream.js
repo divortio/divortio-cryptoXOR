@@ -1,6 +1,6 @@
 /**
- * @fileoverview Streaming Wrapper for SplitMix32 Cipher.
- * **Role:** Transforms Node.js/Web Streams using the SplitMix32 engine.
+ * @fileoverview Streaming Wrapper for SplitMix32ECC Cipher.
+ * **Role:** Transforms Node.js/Web Streams using the SplitMix32ECC engine.
  * **Performance:** Implements "Zero-Copy Fast Path" to bypass buffer allocation
  * for aligned chunks.
  * **Features:** Native support for Pipeline ECC (Chunked Hashing).
@@ -8,8 +8,8 @@
  * @module CryptoXOR_Stream_SplitMix32
  */
 
-import SplitMix32 from './cryptoXOR.splitmix32.js';
-import { ChunkedECC } from './cryptoXOR.ecc.chunked.js';
+import SplitMix32ECC from './cryptoXOR.splitmix32.ecc.js';
+import { StreamECC } from './lib/ecc.stream.js';
 
 /**
  * @typedef {Object} StreamOptions
@@ -24,10 +24,10 @@ import { ChunkedECC } from './cryptoXOR.ecc.chunked.js';
  */
 
 /**
- * Wrapper class for creating SplitMix32 TransformStreams.
+ * Wrapper class for creating SplitMix32ECC TransformStreams.
  * @class
  */
-class SplitMixStream {
+class SplitMixECCStream {
 
     /**
      * Creates an ENCRYPTION stream pipeline.
@@ -38,7 +38,7 @@ class SplitMixStream {
      */
     static createEncryptStream(key, options = {}) {
         // 1. Initialize Engine
-        const cipher = new SplitMix32(key, options.iv);
+        const cipher = new SplitMix32ECC(key, options.iv);
         /** @type {Uint8Array} */
         const iv = cipher.iv;
 
@@ -84,7 +84,7 @@ class SplitMixStream {
                 if (pendingLen === 0) {
                     data = chunk;
                 } else {
-                    data = SplitMixStream._concat(pendingBuffer, chunk);
+                    data = SplitMixECCStream._concat(pendingBuffer, chunk);
                     pendingBuffer = new Uint8Array(0); // Release old reference immediately
                 }
 
@@ -118,7 +118,7 @@ class SplitMixStream {
 
         // 3. Optional Pipeline: Chunked ECC
         if (options.integrityBlockSize && options.integrityBlockSize > 0) {
-            const injector = ChunkedECC.createInjector(options.integrityBlockSize);
+            const injector = StreamECC.createInjector(options.integrityBlockSize);
 
             // Connect: Injector -> Cipher
             // User writes to Injector (which hashes), then Injector pipes to Cipher (which encrypts)
@@ -141,7 +141,7 @@ class SplitMixStream {
      * @returns {TransformStream|PipelineResult} The writable/readable pair.
      */
     static createDecryptStream(key, options = {}) {
-        /** @type {SplitMix32|null} */
+        /** @type {SplitMix32ECC|null} */
         let cipher = null;
         /** @type {Uint8Array|null} */
         let headBuffer = new Uint8Array(0);
@@ -157,11 +157,11 @@ class SplitMixStream {
                 // --- PHASE A: Header Parsing (Cold Path) ---
                 if (!cipher) {
                     // We need to accumulate at least 16 bytes for the IV
-                    headBuffer = SplitMixStream._concat(headBuffer, chunk);
+                    headBuffer = SplitMixECCStream._concat(headBuffer, chunk);
 
                     if (headBuffer.length >= 16) {
                         const iv = headBuffer.slice(0, 16);
-                        cipher = new SplitMix32(key, iv);
+                        cipher = new SplitMix32ECC(key, iv);
 
                         // Remaining data is the first body chunk
                         chunk = headBuffer.slice(16);
@@ -191,7 +191,7 @@ class SplitMixStream {
                 if (pendingLen === 0) {
                     data = chunk;
                 } else {
-                    data = SplitMixStream._concat(pendingBuffer, chunk);
+                    data = SplitMixECCStream._concat(pendingBuffer, chunk);
                     pendingBuffer = new Uint8Array(0);
                 }
 
@@ -218,7 +218,7 @@ class SplitMixStream {
 
         // 2. Optional Pipeline: Chunked ECC
         if (options.integrityBlockSize && options.integrityBlockSize > 0) {
-            const verifier = ChunkedECC.createVerifier(options.integrityBlockSize);
+            const verifier = StreamECC.createVerifier(options.integrityBlockSize);
 
             // Connect: Cipher -> Verifier
             // Cipher decrypts -> Pipes to Verifier (checks hash & strips it) -> Output
@@ -250,4 +250,4 @@ class SplitMixStream {
     }
 }
 
-export default SplitMixStream;
+export default SplitMixECCStream;

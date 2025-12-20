@@ -8,16 +8,16 @@
  * @module CryptoXOR_Xoshiro128
  */
 
-import CryptoXORBase from './lib/base.js';
-// import CryptoXORECC from "./lib/base.ecc.js";
+// import CryptoXORBase from './lib/base.js';
+import CryptoXORECC from "./lib/base.ecc.js";
 
 /**
  * Xoshiro128ECC** Stream Cipher.
  * An extremely fast generator with a 128-bit internal state.
- * @class Xoshiro128
- * @extends CryptoXORBase
+ * @class Xoshiro128ECC
+ * @extends CryptoXORECC
  */
-class Xoshiro128 extends CryptoXORBase {
+class Xoshiro128ECC extends CryptoXORECC {
 
     /**
      * Initializes the Xoshiro128ECC Engine.

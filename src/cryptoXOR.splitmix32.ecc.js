@@ -10,15 +10,15 @@
  * @license MIT
  */
 
-import CryptoXORBase from "./lib/base.js";
-// import CryptoXORECC from "./lib/base.ecc.js";
+
+import CryptoXORECC from "./lib/base.ecc.js";
 /**
  * SplitMix32ECC Stream Cipher.
  * An extremely fast generator with a 32-bit internal state.
- * @class  SplitMix32
- * @extends CryptoXORBase
+ * @class
+ * @extends CryptoXORECC
  */
-class SplitMix32 extends CryptoXORBase {
+class SplitMix32ECC extends CryptoXORECC {
 
     /**
      * Initializes the SplitMix32ECC Engine.

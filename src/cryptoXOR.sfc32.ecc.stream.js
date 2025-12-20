@@ -1,21 +1,19 @@
 /**
- * @fileoverview Streaming Wrapper for Xoshiro128** Cipher.
- * **Role:** Transforms Node.js/Web Streams using the Xoshiro128 engine.
+ * @fileoverview Streaming Wrapper for SFC32ECC Cipher.
+ * **Role:** Transforms Node.js/Web Streams using the SFC32ECC engine.
  * **Performance:** Implements "Zero-Copy Fast Path" to bypass buffer allocation
  * for aligned chunks (99% of network traffic).
  * **Features:** Native support for Pipeline ECC (Chunked Hashing).
- * @module CryptoXOR_Stream_Xoshiro128
- * @author CryptoXOR Team
- * @license MIT
+ * @module CryptoXOR_Stream_SFC32
  */
 
-import Xoshiro128 from './cryptoXOR.xoshiro128.js';
-import { ChunkedECC } from './cryptoXOR.ecc.chunked.js';
+import SFC32ECC from './cryptoXOR.sfc32.ecc.js';
+import { StreamECC } from './lib/ecc.stream.js';
 
 /**
  * @typedef {Object} StreamOptions
  * @property {Uint8Array|function(): Uint8Array} [iv] - Manual IV strategy.
- * @property {number} [integrityBlockSize] - If > 0, enables chunked integrity checks (e.g., 65536).
+ * @property {number} [eccBlockSize] - If > 0, enables chunked ecc checks (e.g., 65536).
  */
 
 /**
@@ -24,11 +22,8 @@ import { ChunkedECC } from './cryptoXOR.ecc.chunked.js';
  * @property {WritableStream} writable - The input stream.
  */
 
-/**
- * Wrapper class for creating Xoshiro128 TransformStreams.
- * @class
- */
-class XoshiroStream {
+
+class SFC32ECCStream {
 
     /**
      * Creates an ENCRYPTION stream pipeline.
@@ -39,7 +34,7 @@ class XoshiroStream {
      */
     static createEncryptStream(key, options = {}) {
         // 1. Initialize Engine
-        const cipher = new Xoshiro128(key, options.iv);
+        const cipher = new SFC32ECC(key, options.iv);
         /** @type {Uint8Array} */
         const iv = cipher.iv;
 
@@ -63,8 +58,8 @@ class XoshiroStream {
                 const pendingLen = pendingBuffer.length | 0;
 
                 // --- 1. OPTIMIZATION: ZERO-COPY FAST PATH ---
-                // If we have no leftovers and the new chunk is aligned (divisible by 4), 
-                // send it DIRECTLY to the cipher. 
+                // If we have no leftovers and the new chunk is aligned (divisible by 4),
+                // send it DIRECTLY to the cipher.
                 // Result: 0 allocations, 0 copies.
                 if (pendingLen === 0) {
                     const remainder = chunkLen & 3; // Modulo 4
@@ -85,7 +80,7 @@ class XoshiroStream {
                 if (pendingLen === 0) {
                     data = chunk;
                 } else {
-                    data = XoshiroStream._concat(pendingBuffer, chunk);
+                    data = SFC32ECCStream._concat(pendingBuffer, chunk);
                     pendingBuffer = new Uint8Array(0); // Release old reference immediately
                 }
 
@@ -118,8 +113,8 @@ class XoshiroStream {
         });
 
         // 3. Optional Pipeline: Chunked ECC
-        if (options.integrityBlockSize && options.integrityBlockSize > 0) {
-            const injector = ChunkedECC.createInjector(options.integrityBlockSize);
+        if (options.eccBlockSize && options.eccBlockSize > 0) {
+            const injector = StreamECC.createInjector(options.eccBlockSize);
 
             // Connect: Injector -> Cipher
             // User writes to Injector (which hashes), then Injector pipes to Cipher (which encrypts)
@@ -136,13 +131,13 @@ class XoshiroStream {
 
     /**
      * Creates a DECRYPTION stream pipeline.
-     * **Pipeline:** `[Write] -> [Cipher] -> (ECCVerifier?) -> [Read]`
+     * * **Pipeline:** `[Write] -> [Cipher] -> (ECCVerifier?) -> [Read]`
      * @param {string|Uint8Array} key - Secret Key.
      * @param {StreamOptions} [options] - Configuration.
      * @returns {TransformStream|PipelineResult} The writable/readable pair.
      */
     static createDecryptStream(key, options = {}) {
-        /** @type {Xoshiro128|null} */
+        /** @type {SFC32ECC|null} */
         let cipher = null;
         /** @type {Uint8Array|null} */
         let headBuffer = new Uint8Array(0);
@@ -158,11 +153,11 @@ class XoshiroStream {
                 // --- PHASE A: Header Parsing (Cold Path) ---
                 if (!cipher) {
                     // We need to accumulate at least 16 bytes for the IV
-                    headBuffer = XoshiroStream._concat(headBuffer, chunk);
+                    headBuffer = SFC32ECCStream._concat(headBuffer, chunk);
 
                     if (headBuffer.length >= 16) {
                         const iv = headBuffer.slice(0, 16);
-                        cipher = new Xoshiro128(key, iv);
+                        cipher = new SFC32ECC(key, iv);
 
                         // Remaining data is the first body chunk
                         chunk = headBuffer.slice(16);
@@ -192,7 +187,7 @@ class XoshiroStream {
                 if (pendingLen === 0) {
                     data = chunk;
                 } else {
-                    data = XoshiroStream._concat(pendingBuffer, chunk);
+                    data = SFC32ECCStream._concat(pendingBuffer, chunk);
                     pendingBuffer = new Uint8Array(0);
                 }
 
@@ -219,7 +214,7 @@ class XoshiroStream {
 
         // 2. Optional Pipeline: Chunked ECC
         if (options.integrityBlockSize && options.integrityBlockSize > 0) {
-            const verifier = ChunkedECC.createVerifier(options.integrityBlockSize);
+            const verifier = StreamECC.createVerifier(options.integrityBlockSize);
 
             // Connect: Cipher -> Verifier
             // Cipher decrypts -> Pipes to Verifier (checks hash & strips it) -> Output
@@ -233,8 +228,7 @@ class XoshiroStream {
         return cipherStream;
     }
 
-    /**
-     * Helper: Fast Buffer Concatenation.
+    /** * Helper: Fast Buffer Concatenation.
      * [V8] Optimized to avoid calling if not needed.
      * @param {Uint8Array} a
      * @param {Uint8Array} b
@@ -252,4 +246,4 @@ class XoshiroStream {
     }
 }
 
-export default XoshiroStream;
+export default SFC32ECCStream;

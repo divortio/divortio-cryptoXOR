@@ -8,14 +8,14 @@
  */
 
 
-// import CryptoXORECC from "./lib/base.ecc.js";
-import CryptoXORBase from "./lib/base.js";
+import CryptoXORECC from "./lib/base.ecc.js";
+
 
 /**
  * @class
- * @extends {CryptoXORBase}
+ * @extends {CryptoXORECC}
  */
-class SFC32 extends CryptoXORBase {
+class SFC32ECC extends CryptoXORECC {
 
     /**
      * Initializes the SFC32ECC Engine.
@@ -184,4 +184,4 @@ class SFC32 extends CryptoXORBase {
     }
 }
 
-export default SFC32;
+export default SFC32ECC;
