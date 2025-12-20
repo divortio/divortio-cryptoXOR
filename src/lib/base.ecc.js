@@ -3,8 +3,8 @@
  * @module CryptoXOR_Base_ECC
  */
 
-import CryptoXORBase from './cryptoXOR.base.js';
-import { ECC } from './cryptoXOR.ecc.js';
+import CryptoXORBase from './base.js';
+import { ECC } from './ecc.js';
 
 export class CryptoXORECC extends CryptoXORBase {
 

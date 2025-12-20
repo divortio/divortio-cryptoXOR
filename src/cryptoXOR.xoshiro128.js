@@ -1,7 +1,7 @@
 /**
- * @fileoverview Xoshiro128ECC** Stream Cipher Engine.
+ * @fileoverview Xoshiro128** Stream Cipher Engine.
  * **Role:** High-performance stream cipher for non-critical data (assets, video).
- * **Algorithm:** Xoshiro128ECC** (XOR/Shift/Rotate).
+ * **Algorithm:** Xoshiro128** (XOR/Shift/Rotate).
  * **Performance:** ~850 MB/s. The fastest variant in the library.
  * **Security:** 128-bit State. Linear complexity means it is vulnerable to
  * algebraic attacks (Z3 solver). Use for speed/obfuscation, not high-value secrets.
@@ -12,7 +12,7 @@ import CryptoXORBase from './lib/base.js';
 // import CryptoXORECC from "./lib/base.ecc.js";
 
 /**
- * Xoshiro128ECC** Stream Cipher.
+ * Xoshiro128** Stream Cipher.
  * An extremely fast generator with a 128-bit internal state.
  * @class Xoshiro128
  * @extends CryptoXORBase
@@ -197,4 +197,4 @@ class Xoshiro128 extends CryptoXORBase {
     }
 }
 
-export default Xoshiro128ECC;
+export default Xoshiro128;

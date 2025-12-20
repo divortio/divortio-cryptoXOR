@@ -1,7 +1,7 @@
 /**
- * @fileoverview SplitMix32ECC Stream Cipher Engine.
+ * @fileoverview SplitMix32 Stream Cipher Engine.
  * * **Role:** High-speed obfuscation engine (NOT for high-security secrets).
- * * **Algorithm:** SplitMix32ECC (32-bit State).
+ * * **Algorithm:** SplitMix32 (32-bit State).
  * * **Performance:** ~800 MB/s. Extreme throughput via simple arithmetic.
  * * **Security Warning:** 32-bit state is vulnerable to brute-force attacks in < 1 second.
  * Use only for obfuscation, testing, or ephemeral session tokens.
@@ -13,7 +13,7 @@
 import CryptoXORBase from "./lib/base.js";
 // import CryptoXORECC from "./lib/base.ecc.js";
 /**
- * SplitMix32ECC Stream Cipher.
+ * SplitMix32 Stream Cipher.
  * An extremely fast generator with a 32-bit internal state.
  * @class  SplitMix32
  * @extends CryptoXORBase
@@ -160,4 +160,4 @@ class SplitMix32 extends CryptoXORBase {
     }
 }
 
-export default SplitMix32ECC;
+export default SplitMix32;
