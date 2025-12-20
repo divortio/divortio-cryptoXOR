@@ -3,9 +3,9 @@ import assert from 'node:assert';
 import { createSfc32, createSplitMix32, createXoshiro128 } from '../../../src/index.mjs';
 
 const factories = [
-    { name: 'SFC32',      fn: createSfc32,      args: [1, 2, 3, 4] },
-    { name: 'SplitMix32', fn: createSplitMix32, args: [1] }, // Note different arg count
-    { name: 'Xoshiro128', fn: createXoshiro128, args: [1, 2, 3, 4] }
+    { name: 'SFC32ECC',      fn: createSfc32,      args: [1, 2, 3, 4] },
+    { name: 'SplitMix32ECC', fn: createSplitMix32, args: [1] }, // Note different arg count
+    { name: 'Xoshiro128ECC', fn: createXoshiro128, args: [1, 2, 3, 4] }
 ];
 
 test('Interface Contract: All variants must allow hot-swapping', async (t) => {

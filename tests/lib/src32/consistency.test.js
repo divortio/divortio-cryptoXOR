@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert';
 import { createSfc32 } from '../../../src/index.mjs';
 
-test('SFC32: Stream vs Core Consistency', () => {
+test('SFC32ECC: Stream vs Core Consistency', () => {
     const seed = [1, 2, 3, 4];
 
     // Instance 1: Core

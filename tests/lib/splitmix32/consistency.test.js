@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert';
 import { createSplitMix32 } from '../../../src/index.mjs';
 
-test('SplitMix32: Stream vs Core Consistency', () => {
+test('SplitMix32ECC: Stream vs Core Consistency', () => {
     const seed = 0xDEADBEEF;
 
     const rngCore = createSplitMix32(seed);

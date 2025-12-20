@@ -6,9 +6,9 @@ import { createSfc32, createSplitMix32, createXoshiro128 } from '../../../src/in
 const toDouble = (int32) => (int32 >>> 0) / 4294967296;
 
 const factories = [
-    { name: 'SFC32',      fn: createSfc32,      args: [1, 2, 3, 4] },
-    { name: 'SplitMix32', fn: createSplitMix32, args: [12345] },
-    { name: 'Xoshiro128', fn: createXoshiro128, args: [1, 2, 3, 4] }
+    { name: 'SFC32ECC',      fn: createSfc32,      args: [1, 2, 3, 4] },
+    { name: 'SplitMix32ECC', fn: createSplitMix32, args: [12345] },
+    { name: 'Xoshiro128ECC', fn: createXoshiro128, args: [1, 2, 3, 4] }
 ];
 
 test('Statistical Smoke Test: Output looks roughly random', async (t) => {

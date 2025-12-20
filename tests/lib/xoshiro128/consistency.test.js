@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert';
 import { createXoshiro128 } from '../../../src/index.mjs';
 
-test('Xoshiro128: Stream vs Core Consistency', () => {
+test('Xoshiro128ECC: Stream vs Core Consistency', () => {
     const seed = [0x11111111, 0x22222222, 0x33333333, 0x44444444];
 
     const rngCore = createXoshiro128(...seed);

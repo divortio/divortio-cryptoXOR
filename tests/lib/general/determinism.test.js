@@ -17,7 +17,7 @@ test('Global Determinism: Same Seed = Same Output', () => {
     assert.notStrictEqual(val1, val3, 'Different seeds produced same output (unlikely collision)!');
 });
 
-test('Xoshiro128: Verify Known Sequence (Sanity Check)', () => {
+test('Xoshiro128ECC: Verify Known Sequence (Sanity Check)', () => {
     // It is often good to check against a known value to ensure
     // we didn't break the math implementation itself during a refactor.
     // Seed: 1, 2, 3, 4
