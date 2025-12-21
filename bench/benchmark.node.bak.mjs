@@ -23,11 +23,11 @@ import { CamelliaNode } from './libs/node/camellia.node.js';
 import { BlowfishNode } from './libs/node/blowfish.node.js';
 import { DesCbcNode } from './libs/node/des.cbc.node.js';
 
-import { DesNode } from './libs/node/des.node.js';
+import { DesEcbNode } from './libs/node/des.ecb.node.js';
 import { Des3Node } from './libs/node/des3.node.js';
 import { Rc4HmacMd5Node } from './libs/node/rc4.hmac.md5.node.js';
-import { Aes256Node } from './libs/node/aes256.node.js';
-import { Aes128Node } from './libs/node/aes128.node.js';
+import { Aes256CbcNode } from './libs/node/aes256.cbc.node.js';
+import { Aes128CbcNode } from './libs/node/aes128.cbc.node.js';
 import { Rc4Node } from './libs/node/rc4.node.js';
 
 import { ChaCha20Poly1305Node } from './libs/node/chaCha20.poly1305.node.js';
@@ -89,7 +89,7 @@ function wrapDesNode() {
     // DES Key = 8 bytes
     const key = Buffer.alloc(8, 1);
     const nonce = Buffer.alloc(12, 1); // Wrapper truncates to 8
-    const cipher = new DesNode(key, nonce);
+    const cipher = new DesEcbNode(key, nonce);
     return (buffer) => {
         cipher.process(buffer);
     };
@@ -166,7 +166,7 @@ function wrapAes128Node() {
     const key = Buffer.alloc(16, 1);
     // 12-byte nonce (will be padded by adapter)
     const nonce = Buffer.alloc(12, 1);
-    const cipher = new Aes128Node(key, nonce);
+    const cipher = new Aes128CbcNode(key, nonce);
     return (buffer) => {
         cipher.process(buffer);
     };
@@ -234,7 +234,7 @@ function wrapAes256Node() {
     // 256-bit Key = 32 Bytes
     const key = Buffer.alloc(32, 1);
     const nonce = Buffer.alloc(12, 1);
-    const cipher = new Aes256Node(key, nonce);
+    const cipher = new Aes256CbcNode(key, nonce);
     return (buffer) => {
         cipher.process(buffer);
     };

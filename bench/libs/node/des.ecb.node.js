@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 // Single DES (Legacy 56-bit security).
 // Key Size: 8 bytes.
 // IV Size: 8 bytes.
-export class DesNode {
+export class DesEcbNode {
     /**
      * @param {Buffer|Uint8Array} key - 8 bytes.
      * @param {Buffer|Uint8Array} nonce - 12 bytes (truncated to 8).

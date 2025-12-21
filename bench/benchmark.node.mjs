@@ -41,19 +41,19 @@ import FastAesSoft from './libs/v8/aes128.v8.js';
 import { ChaCha20Node } from './libs/node/chaCha20.node.js';
 import { Rc4Node } from './libs/node/rc4.node.js';
 import { Rc4HmacMd5Node } from './libs/node/rc4.hmac.md5.node.js';
-import { DesNode } from './libs/node/des.node.js';
+import { DesEcbNode } from './libs/node/des.ecb.node.js';
 import { DesCbcNode } from './libs/node/des.cbc.node.js';
 import { Des3Node } from './libs/node/des3.node.js';
 import { BlowfishNode } from './libs/node/blowfish.node.js';
 import { CamelliaNode } from './libs/node/camellia.node.js';
 import { StitchedCipherNode } from './libs/node/stitched.node.js';
 
-import { Aes128Node } from './libs/node/aes128.node.js';
+import { Aes128CbcNode } from './libs/node/aes128.cbc.node.js';
 import { Aes128CtrNode } from './libs/node/aes128.ctr.node.js';
 import { Aes128GcmNode } from './libs/node/aes128.gcm.node.js';
 // import { Aes128CcmNode } from './libs/node/aes128.ccm.node.js'; // CCM not supported in streams
 
-import { Aes256Node } from './libs/node/aes256.node.js';
+import { Aes256CbcNode } from './libs/node/aes256.cbc.node.js';
 import { Aes256CtrNode } from './libs/node/aes256.ctr.node.js';
 import { Aes256GcmNode } from './libs/node/aes256.gcm.node.js';
 
@@ -196,8 +196,8 @@ async function runBenchmark() {
         // --- 5. Node.js Native (AES) ---
         prepare('AES-128-CTR (Node)', Aes128CtrNode, 16, 16),
         prepare('AES-256-CTR (Node)', Aes256CtrNode, 32, 16),
-        prepare('AES-128-CBC (Node)', Aes128Node, 16, 16),
-        prepare('AES-256-CBC (Node)', Aes256Node, 32, 16),
+        prepare('AES-128-CBC (Node)', Aes128CbcNode, 16, 16),
+        prepare('AES-256-CBC (Node)', Aes256CbcNode, 32, 16),
 
         // --- 6. Node.js Native (Authenticated) ---
         prepare('AES-128-GCM (Node)', Aes128GcmNode, 16, 12),
